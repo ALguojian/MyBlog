@@ -1,27 +1,36 @@
 package test.expmle.com.myblog;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.view.KeyEvent;
 import android.view.WindowManager;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
     protected WebView webView;
-    private long time=0;
+    private String url;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         super.setContentView(R.layout.activity_main);
         initView();
+        String uuuuu = getIntent().getStringExtra("url");
+        if (uuuuu != null && !uuuuu.isEmpty())
+            url = getIntent().getStringExtra("url");
+        else
+            url = "http://guojian.site";
         init();
+    }
+
+    public static void startActivity(Context context, String url) {
+        Intent intent = new Intent(context, MainActivity.class).putExtra("url", url);
+        context.startActivity(intent);
     }
 
     private void init() {
@@ -42,36 +51,14 @@ public class MainActivity extends AppCompatActivity {
         //设置H5缓存目录
         settings.setAppCachePath(MainActivity.this.getDir("cache", Context.MODE_PRIVATE).getPath());
 
-        webView.loadUrl("http://guojian.site");
+        webView.loadUrl(url);
     }
 
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (event.getAction() == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_BACK) {
-
-            if (webView.canGoBack()){
-
-                webView.goBack();
-
-            }else {
-                if ((System.currentTimeMillis() - time) > 3000) {
-
-                    Toast.makeText(MainActivity.this,"再按一次退出",Toast.LENGTH_SHORT).show();
-                    time = System.currentTimeMillis();
-                } else {
-                    finish();
-                }
-            }
-            return true;// 未处理
-        }
-        return super.onKeyDown(keyCode, event);
-    }
-
-    private class AA extends WebViewClient{
+    private class AA extends WebViewClient {
 
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
-            view.loadUrl(url);
+            startActivity(MainActivity.this, url);
             return true;
         }
 
@@ -80,10 +67,8 @@ public class MainActivity extends AppCompatActivity {
     private void initView() {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-
             //隐藏状态栏
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS, WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-
             //隐藏导航栏
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
         }
